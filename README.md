@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✦ OrynthMenus
+# OrynthMenus
 
 ### Красивые GUI-меню и Bedrock-формы для NukkitMOT
 
