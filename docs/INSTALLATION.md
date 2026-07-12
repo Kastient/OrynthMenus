@@ -8,8 +8,8 @@
 | :--- | :--- |
 | Сервер | NukkitMOT |
 | Java | 17 или новее |
-| OrynthMenus | 1.1.0 |
-| FakeInventories | Обязательно |
+| OrynthMenus | 1.0.1 |
+| FakeInventories | 1.1.8 (обязательно) |
 | EconomyAPI | Опционально |
 | OrynthEconomy | Опционально |
 | PlaceholderAPI-nukkit | Опционально |
@@ -53,7 +53,7 @@ plugins/
 Результат:
 
 ```text
-build/libs/OrynthMenus-1.1.0.jar
+build/libs/OrynthMenus-1.0.1.jar
 ```
 
 ## Основной config.yml
@@ -62,12 +62,8 @@ build/libs/OrynthMenus-1.1.0.jar
 config-version: 2
 language: RU
 
-security:
-  click-cooldown-ms: 300
-
 economy:
-  provider: EconomyAPI
-  orynth-currency: regular
+  provider: AUTO
 
 gui_menus:
   main:
@@ -80,10 +76,6 @@ gui_menus:
 
 Поддерживаются `RU` и `EN`. Настройка меняет встроенные сообщения, справку и административную панель.
 
-### `security.click-cooldown-ms`
-
-Минимальная пауза между кликами игрока по кнопкам меню. Значение `0` отключает ограничение. По умолчанию — `300` мс.
-
 ### `economy.provider`
 
 | Значение | Поведение |
@@ -93,7 +85,7 @@ gui_menus:
 | `AUTO` | Сначала искать OrynthEconomy, затем EconomyAPI |
 | `NONE` | Отключить денежные операции |
 
-Для OrynthEconomy параметр `economy.orynth-currency` принимает `regular` или `donate`.
+Глобального выбора валюты нет. В каждом `has money`, `take_money`, `give_money` и `trade` можно указать `currency: regular` или `currency: donate`. Это позволяет смешивать обычные и донатные товары в одном меню.
 
 ## Регистрация меню
 
@@ -133,6 +125,10 @@ gui_menus:
 ### Плагин не запускается
 
 Проверьте Java 17, наличие FakeInventories и совместимость `core.jar`/NukkitMOT.
+
+### Сундук не открывается, в логе `FakeInventories.getInstance()`
+
+Это означает, что другой плагин встроил в свой JAR старые классы `me.iwareq.fakeinventories.*`. OrynthMenus 1.0.1 обнаруживает известный конфликт и включает совместимый `CustomInventory`. Сервер после замены JAR нужно полностью перезапустить, а не reload через PlugMan. В идеале автор конфликтующего плагина должен убрать библиотеку из JAR или сделать relocation.
 
 ### Денежные действия всегда отклоняются
 

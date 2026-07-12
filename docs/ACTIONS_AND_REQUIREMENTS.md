@@ -8,13 +8,13 @@
 
 1. проверяется `click-permission`;
 2. проверяются простые `requirements` и расширенный `click_requirement`;
-3. для экономических действий выполняется предварительная суммарная проверка;
-4. запускается `success_action`;
-5. запускается основной `action`.
+3. для ресурсных действий выполняется предварительная суммарная проверка;
+4. списания и `trade` выполняются до выдачи ресурсов;
+5. затем идут визуальные и остальные действия.
 
 При провале проверки выполняется `deny_action`. Если его нет, используется `denial-message`, затем встроенное локализованное сообщение.
 
-Действия идут строго сверху вниз. Ошибка останавливает оставшуюся цепочку.
+После безопасной ресурсной части остальные действия сохраняют порядок YAML. Ошибка останавливает оставшуюся цепочку.
 
 ## Короткий строковый формат
 
@@ -29,6 +29,7 @@ action:
   - "[popup] &bУведомление"
   - "[sound] RANDOM_LEVELUP"
   - "[open] next_menu"
+  - "[back]"
   - "[refresh]"
   - "[close]"
 ```
@@ -44,6 +45,7 @@ action:
 | `[popup] <текст>` | Popup |
 | `[sound] <звук>` | Звук около игрока |
 | `[open] <menu-id>` | Открыть другое меню |
+| `[back]` | Вернуться в предыдущее меню |
 | `[refresh]` | Перерисовать текущее inventory-меню |
 | `[close]` | Закрыть активное меню/форму |
 
@@ -74,6 +76,8 @@ action:
 - type: close_menu
 
 - type: refresh_menu
+
+- type: back_menu
 ```
 
 Для `message`, `tip`, `popup`, `actionbar` допускается поле `text`; для `title` — `text`; для `sound` — `name`.
@@ -97,12 +101,45 @@ action:
 ```yaml
 - type: take_money
   amount: 500
+  currency: regular
 
 - type: give_money
   amount: 250
+  currency: donate
 ```
 
-Алиасы: `withdraw_money` и `deposit_money`. Требуется активный EconomyAPI или OrynthEconomy.
+Алиасы: `withdraw_money` и `deposit_money`. Требуется активный EconomyAPI или OrynthEconomy. Если `currency` не указана, используется `regular`; EconomyAPI поддерживает только обычную валюту.
+
+### Атомарная покупка и продажа
+
+```yaml
+- type: trade
+  operation: buy
+  material: "minecraft:diamond"
+  amount: 16
+  price: 250
+  currency: regular
+
+- type: trade
+  operation: sell
+  material: "minecraft:emerald"
+  amount: 32
+  reward: 100
+  currency: donate
+```
+
+`trade` сам проверяет баланс, предметы и свободное место. При отказе экономики инвентарь восстанавливается. Для количеств 1/16/32/64 на Bedrock создаются отдельные кнопки, а не Java-схема левого/правого клика.
+
+### Задержка и шанс
+
+```yaml
+- type: message
+  message: "&aГотово!"
+  delay-ticks: 20
+  chance: 50
+```
+
+`delay-ticks` и `chance` (0–100) разрешены только для сообщений, title/actionbar/tip/popup, звуков и переходов по меню. Для денег, предметов, permissions и `trade` модификаторы запрещены валидатором.
 
 ### Опыт
 
@@ -184,7 +221,40 @@ click_requirement:
 | `has money` / `money` | `amount` |
 | `has experience` / `experience` | `amount` или `levels` |
 | `has item` / `item` | `material`, опционально `amount` |
+| `string equals` | `input`, `output` |
+| `string equals ignorecase` | `input`, `output` |
+| `string contains` | `input`, `output` |
+| `regex matches` | `input`, `regex` |
+| `>`, `>=`, `==`, `!=`, `<=`, `<` | `input`, `output` |
+| `world` | `output` или `value` |
+| `gamemode` | `output`: `survival`, `creative`, `adventure`, `spectator` |
+| `is near` | `world`, `x`, `y`, `z`, `distance` |
 | пользовательский тип | Поля определяет внешний плагин |
+
+## Требования открытия
+
+`open_requirement` использует ту же схему, что `view_requirement` и `click_requirement`:
+
+```yaml
+open_requirement:
+  requirements:
+    spawn:
+      type: world
+      output: world
+    distance:
+      type: is near
+      world: world
+      x: 0
+      y: 64
+      z: 0
+      distance: 100
+  deny_action:
+    - "[message] &cМеню доступно только на спавне."
+  success_action:
+    - "[sound] random.click"
+```
+
+`/omenus open <игрок> <menu-id>` намеренно обходит условия, так как это административная команда.
 
 ## Отрицания
 
@@ -234,9 +304,6 @@ items:
       - "&7Не хватает: &c%OrynthMenus_money_missing<1000>%"
     click_requirement:
       requirements:
-        money:
-          type: "has money"
-          amount: 1000
         not_owned:
           type: "!has permission"
           permission: "server.premium"
@@ -246,15 +313,19 @@ items:
     success_action:
       - "[sound] RANDOM_LEVELUP"
     action:
-      - type: take_money
-        amount: 1000
+      - type: trade
+        operation: buy
+        material: "minecraft:nether_star"
+        amount: 1
+        price: 1000
+        currency: regular
       - type: give_permission
         permission: "server.premium"
       - "[message] &aПремиум-доступ активирован!"
       - "[refresh]"
 ```
 
-## Preflight-защита
+## Preflight и атомарные транзакции
 
 Перед цепочкой OrynthMenus суммирует все `take_money`, `take_experience*`, `take_item` и `give_item`. Цепочка не запускается, если:
 
@@ -264,6 +335,8 @@ items:
 - инвентарь не вместит выдаваемые предметы.
 
 Это уменьшает риск частично выполненных покупок и потери ресурсов.
+
+Для обычных магазинов предпочтителен `trade`: он хранит снимок инвентаря, списывает ресурсы до выдачи и восстанавливает инвентарь, если экономический провайдер отклонил операцию. Искусственного КД нет: быстрые последовательные клики разрешены, а повторный вход в уже идущую операцию блокируется.
 
 ---
 

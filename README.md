@@ -6,7 +6,7 @@
 
 Создавайте магазины, навигацию, донат-меню, награды и интерактивные интерфейсы — без изменения Java-кода.
 
-![Version](https://img.shields.io/badge/version-1.1.0-7c3aed?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-1.0.1-7c3aed?style=for-the-badge)
 ![Java](https://img.shields.io/badge/Java-17+-f97316?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Platform](https://img.shields.io/badge/Nukkit-MOT-22c55e?style=for-the-badge)
 ![Config](https://img.shields.io/badge/config-YAML-0ea5e9?style=for-the-badge)
@@ -27,12 +27,12 @@
 | :--- | :--- |
 | 🧰 **Inventory GUI** | Сундуки, двойные сундуки, воронки, печи и другие контейнеры с собственными названиями |
 | 📱 **Bedrock Forms** | Лёгкие нативные формы с многострочным текстом и кнопками |
-| ⚡ **Действия** | Команды, сообщения, звуки, предметы, деньги, опыт, эффекты и permissions |
-| 🔐 **Условия** | Отображение и нажатие по правам, балансу, опыту, предметам или собственным проверкам |
+| ⚡ **Действия** | Команды, сообщения, звуки, `trade`, предметы, деньги, опыт, эффекты и permissions |
+| 🔐 **Условия** | Открытие, отображение и нажатие по правам, балансу, опыту, предметам, regex, миру, режиму и расстоянию |
 | 💰 **Экономика** | EconomyAPI и OrynthEconomy, включая обычную и донат-валюту |
 | 🧩 **Плейсхолдеры** | Встроенные переменные и интеграция с PlaceholderAPI-nukkit |
-| 🎛️ **Редактор** | Bedrock-панель настроек и визуальная перестановка предметов по слотам |
-| 🛡️ **Безопасность** | Атомарная перезагрузка, резервные копии, preflight покупок и антиспам кликов |
+| 🎛️ **Редактор** | Настоящий сундук без заглушек: перенос и стаки, автоматические `item_N`, `slot`/`slots`, настройки кнопки через Shift + клик |
+| 🛡️ **Безопасность** | Атомарный reload, резервные копии, транзакции `trade` и защита от повторного входа без искусственного click-cooldown |
 
 ## Быстрый старт
 
@@ -46,7 +46,7 @@
 
 ### Установка
 
-1. Поместите `OrynthMenus-1.1.0.jar` и FakeInventories в папку `plugins/`.
+1. Поместите `OrynthMenus-1.0.1.jar` и FakeInventories 1.1.8 в папку `plugins/`.
 2. Запустите сервер — плагин создаст `config.yml` и примеры в `plugins/OrynthMenus/menus/`.
 3. Зарегистрируйте своё меню в `config.yml`.
 4. Проверьте YAML командой `/omenus validate`.
@@ -87,11 +87,12 @@ items:
         - "[message] &cНедостаточно монет."
         - "[sound] NOTE_BASS"
     action:
-      - type: take_money
-        amount: 500
-      - type: give_item
+      - type: trade
+        operation: buy
         material: "minecraft:diamond"
         amount: 1
+        price: 500
+        currency: regular
       - "[message] &aПокупка выполнена!"
       - "[sound] RANDOM_LEVELUP"
 ```
@@ -136,14 +137,16 @@ items:
 
 ## Поддерживаемые контейнеры
 
-`CHEST` (27) · `DOUBLE_CHEST` (54) · `HOPPER` (5) · `FURNACE` (3) · `ENDER_CHEST` · `DISPENSER` · `DROPPER` · `BREWING_STAND` · `SHULKER_BOX` · `BEACON` · `BARREL` · `BLAST_FURNACE` · `SMOKER`
+`CHEST` (27) · `DOUBLE_CHEST` (54) · `HOPPER` (5) · `FURNACE` (3) · `ENDER_CHEST` · `DISPENSER` · `DROPPER` · `BREWING_STAND` · `SHULKER_BOX`
 
 ## Плейсхолдеры
 
 | Плейсхолдер | Значение |
 | :--- | :--- |
 | `%OrynthMenus_balance%` | Текущий баланс игрока |
+| `%OrynthMenus_donate_balance%` | Донатный баланс OrynthEconomy |
 | `%OrynthMenus_money_missing<5000>%` | Сколько денег не хватает до суммы |
+| `%OrynthMenus_donate_missing<100>%` | Сколько не хватает донат-валюты |
 | `%OrynthMenus_experience%` | Текущий уровень опыта |
 | `%OrynthMenus_experience_missing<45>%` | Сколько уровней не хватает до значения |
 
@@ -171,13 +174,14 @@ api.registerRequirement("has tokens", context ->
 - редактор создаёт резервные копии перед записью YAML;
 - перед покупкой проверяются суммарные списания и свободное место;
 - предметы интерфейса нельзя забрать или переложить;
-- частые повторные клики блокируются настраиваемым cooldown.
+- быстрые последовательные клики разрешены, а повторный вход в одну операцию блокируется;
+- OrynthMenus обходит конфликт, когда другой плагин зашил старый `me.iwareq.fakeinventories.*` без relocation.
 
 ---
 
 <div align="center">
 
-**OrynthMenus 1.1.0** · Автор: **Cryovex**
+**OrynthMenus 1.0.1** · Автор: **Cryovex**
 
 Создано для серверов Minecraft Bedrock на NukkitMOT.
 

@@ -25,6 +25,7 @@ ID `example` используется в API, `/omenus open` и действия
 | `size` | число | зависит от типа | Размер контейнера |
 | `update_interval` | число | нет | Интервал динамического обновления в секундах |
 | `open` | секция | нет | Команда, permission, описание и действия открытия |
+| `open_requirement` | секция | нет | Условия, `deny_action` и `success_action` при открытии |
 | `items` | секция | да | Кнопки меню; также поддерживается имя `buttons` |
 
 Корневую конфигурацию можно обернуть в секцию `menu:` — загрузчик объединит её с остальными корневыми полями.
@@ -80,10 +81,6 @@ items:
 | `DROPPER` | стандартный размер Nukkit |
 | `BREWING_STAND` | стандартный размер Nukkit |
 | `SHULKER_BOX` | стандартный размер Nukkit |
-| `BEACON` | стандартный размер Nukkit |
-| `BARREL` | стандартный размер Nukkit |
-| `BLAST_FURNACE` | стандартный размер Nukkit |
-| `SMOKER` | стандартный размер Nukkit |
 
 Для `CHEST` размер должен делиться на 9. Значение `CHEST` + `size: 54` автоматически превращается в `DOUBLE_CHEST`.
 
@@ -255,6 +252,7 @@ content:
 | `{level}` / `%level%` | Уровень опыта |
 | `{money}` / `%money%` | Форматированный баланс |
 | `{economy_balance}` | Форматированный баланс |
+| `{donate_balance}` | Форматированный донатный баланс |
 | `{menu}` | ID текущего меню |
 
 ## Плейсхолдеры OrynthMenus
@@ -263,9 +261,11 @@ content:
 | :--- | :--- |
 | `%OrynthMenus_balance%` | Баланс |
 | `%OrynthMenus_money%` | Алиас баланса |
+| `%OrynthMenus_donate_balance%` | Донатный баланс OrynthEconomy |
 | `%OrynthMenus_experience%` | Уровень опыта |
 | `%OrynthMenus_level%` | Алиас уровня |
 | `%OrynthMenus_money_missing<5000>%` | Недостающая сумма |
+| `%OrynthMenus_donate_missing<100>%` | Недостающая донат-сумма |
 | `%OrynthMenus_experience_missing<45>%` | Недостающие уровни |
 
 Поддерживаются варианты `orynthmenus_*` в нижнем регистре. Внутри меню они работают всегда; при наличии PlaceholderAPI регистрируются глобально.
