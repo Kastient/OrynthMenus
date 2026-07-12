@@ -6,7 +6,7 @@
 
 Создавайте магазины, навигацию, донат-меню, награды и интерактивные интерфейсы — без изменения Java-кода.
 
-![Version](https://img.shields.io/badge/version-1.0.1-7c3aed?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-1.0.2-7c3aed?style=for-the-badge)
 ![Java](https://img.shields.io/badge/Java-17+-f97316?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Platform](https://img.shields.io/badge/Nukkit-MOT-22c55e?style=for-the-badge)
 ![Config](https://img.shields.io/badge/config-YAML-0ea5e9?style=for-the-badge)
@@ -46,7 +46,7 @@
 
 ### Установка
 
-1. Поместите `OrynthMenus-1.0.1.jar` и FakeInventories 1.1.8 в папку `plugins/`.
+1. Поместите `OrynthMenus-1.0.2.jar` и FakeInventories 1.1.8 в папку `plugins/`.
 2. Запустите сервер — плагин создаст `config.yml` и примеры в `plugins/OrynthMenus/menus/`.
 3. Зарегистрируйте своё меню в `config.yml`.
 4. Проверьте YAML командой `/omenus validate`.
@@ -181,7 +181,7 @@ api.registerRequirement("has tokens", context ->
 
 <div align="center">
 
-**OrynthMenus 1.0.1** · Автор: **Cryovex**
+**OrynthMenus 1.0.2** · Автор: **Cryovex**
 
 Создано для серверов Minecraft Bedrock на NukkitMOT.
 
